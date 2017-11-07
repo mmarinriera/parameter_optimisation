@@ -44,12 +44,11 @@ class sphere_intercalation(base):
 ################################################################################################
 
 pop_size = 10
-n_generations_per_iter = 10
+n_generations_per_iter = 5
 n_iter = 5
-n_islands = 10
+n_islands = 5
 stop_threshold = 0.40
 run_identifier = "pso_var5_migration-0.2_topo-ring_benchmark" + "-p" + str(pop_size) + "-g" + str(n_generations_per_iter * n_iter)
-
 
 
 log_name = run_identifier + ".log"
@@ -61,7 +60,7 @@ logfile.write("distance threshold: " + str(stop_threshold) + "\n")
 
 # Define the problem
 prob = sphere_intercalation(dim = n_params)
-# prob = problem.schwefel(10)
+# prob = problem.schwefel(5)
 algo = algorithm.pso(gen = n_generations_per_iter, variant = 5)
 
 archi = archipelago(topology=topology.ring())
@@ -72,12 +71,18 @@ for i in range(n_islands):
     archi.push_back(island(algo, prob, pop_size, s_policy = emigration, r_policy = replacement))
     # archi.push_back(island(algorithm.jde(gen = n_generations_per_iter, ftol = 0.31), prob, pop_size))
 
-for i in range(1, n_iter):
+for i in range(n_iter):
     archi.evolve(n_generations_per_iter)  # Evolve the island
     archi.join()
 
+    logfile.write("After " + str(n_generations_per_iter * (i + 1)) + " iterations\n")
+    optimum_reached = min([isl.population.champion.f[0] for isl in archi]) < stop_threshold
+
+    if(optimum_reached):
+        logfile.write("\tOPTIMUM REACHED!" + "\n")
+
     count = 0
-    logfile.write("After " + str(n_generations_per_iter * i) + " iterations\n")
+
     for isl in archi:
         # print("Island ", count)
         # print("\tFinal champion distance =", isl.population.champion.f)
@@ -89,12 +94,15 @@ for i in range(1, n_iter):
         logfile.write("\tChampion params =\n\t" + str(isl.population.champion.x) + "\n")
         logfile.write("\n")
 
-        if(i == 5):
+        if(i == n_iter - 1 or optimum_reached):
             code_name = run_identifier + "_" + "island-" + str(count) + "_champion"
             model_call = [executable, target_file, code_name, "true", "0"] + [str(i) for i in isl.population.champion.x]
             # print("champion call", model_call)
             result = subprocess.run(model_call, stdout=subprocess.PIPE)
 
         count += 1
+
+    if(optimum_reached):
+        break
 
 logfile.close()
