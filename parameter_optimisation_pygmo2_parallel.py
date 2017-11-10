@@ -1,5 +1,6 @@
 import pygmo as pg
 import subprocess
+import sys
 
 executable = "./sphere_intercalation_PD.e"
 target_file = "PD_targets/target_limb_like_0.75_0.0_1.0_0.0_0.5.Tf_0.vtk"
@@ -28,7 +29,7 @@ class sphere_intercalation:
         return ([0] * self.dim, [1] * self.dim)
 
     def get_name(self):
-        return "Simulation of sphere_intercalation with 2 different tissu domains"
+        return "Simulation of sphere_intercalation with 2 different tissue domains"
 
     # Finally we also reimplement a virtual method that adds some output to the __repr__ method
     def get_extra_info(self):
@@ -36,27 +37,32 @@ class sphere_intercalation:
 
 ################################################################################################
 
-pop_size = 5
-n_generations_per_iter = 1
-n_iter = 1
-n_islands = 1
-stop_threshold = 0.40
-run_identifier = "codename" + "-p" + str(pop_size) + "-g" + str(n_generations_per_iter * n_iter)
-
-
-log_name = run_identifier + ".log"
-logfile = open(log_name,"w")
-logfile.write("General data.\n")
-logfile.write("target shape file: " + target_file + "\n")
-logfile.write("distance threshold: " + str(stop_threshold) + "\n")
-
-prob = pg.problem(sphere_intercalation())
-# prob = pg.problem(pg.schwefel(5))
-
-algo = pg.algorithm(pg.pso(gen = n_generations_per_iter, variant = 5))
-
 if __name__ == "__main__":
-    archi = pg.archipelago(n=2,algo=algo, prob=prob, pop_size=pop_size)
+    code_name = sys.argv[1]
+    pop_size = int(sys.argv[2])
+    n_islands = int(sys.argv[3])
+    n_generations_per_iter = int(sys.argv[4])
+    n_iter = int(sys.argv[5])
+    stop_threshold = 0.40
+    run_identifier = code_name + "-p" + str(pop_size) + "-i" + str(n_islands)\
+    + "-g" + str(n_generations_per_iter * n_iter)
+
+    print("code_name:", code_name)
+    print("pop. size =", pop_size, "n. islands =", n_islands,\
+    "gens. per iter. =", n_generations_per_iter, "n. iter. =", n_iter)
+
+    log_name = run_identifier + ".log"
+    logfile = open(log_name,"w")
+    logfile.write("General data.\n")
+    logfile.write("target shape file: " + target_file + "\n")
+    logfile.write("distance threshold: " + str(stop_threshold) + "\n")
+
+    prob = pg.problem(sphere_intercalation())
+    # prob = pg.problem(pg.schwefel(5))
+
+    algo = pg.algorithm(pg.pso(gen = n_generations_per_iter, variant = 5))
+
+    archi = pg.archipelago(n = n_islands, algo = algo, prob = prob, pop_size = pop_size)
     # emigration = migration.best_s_policy(0.2,migration.rate_type.fractional) #emigrant selection policy
     # replacement = migration.fair_r_policy(0.2,migration.rate_type.fractional) #replacement of locals by immigrants
 
