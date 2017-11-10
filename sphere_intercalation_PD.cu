@@ -218,9 +218,9 @@ int main(int argc, char const* argv[])
     std::string ic_file_name = "sphere_ic.vtk";
     std::string opt_file_name = argv[1];
     std::string codename = argv[2];
-    std::string output = argv[3];
+    std::string output_mode = argv[3];
     bool write_output = false;
-    if(output == "true")
+    if(output_mode == "true")
         write_output = true;
     std::string device_idx = argv[4];
     cudaSetDevice(std::stoi(device_idx));
