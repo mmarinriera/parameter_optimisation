@@ -1,6 +1,7 @@
 import pygmo as pg
 import subprocess
 import sys
+import time
 
 executable = "./sphere_intercalation_PD.e"
 target_file = "PD_targets/target_limb_like_0.75_0.0_1.0_0.0_0.5.Tf_0.vtk"
@@ -62,13 +63,19 @@ if __name__ == "__main__":
 
     algo = pg.algorithm(pg.pso(gen = n_generations_per_iter, variant = 5))
 
+    start_time = time.time()
+
     archi = pg.archipelago(n = n_islands, algo = algo, prob = prob, pop_size = pop_size)
-    # emigration = migration.best_s_policy(0.2,migration.rate_type.fractional) #emigrant selection policy
-    # replacement = migration.fair_r_policy(0.2,migration.rate_type.fractional) #replacement of locals by immigrants
+
+    print("time for initialisation", time.time() - start_time,"s")
 
     for i in range(n_iter):
+        start_time = time.time()
+
         archi.evolve(n_generations_per_iter)
         archi.wait()
+
+        print("iteration", i, "took", time.time() - start_time,"s")
 
         logfile.write("After " + str(n_generations_per_iter * (i + 1)) + " iterations\n")
         optimum_reached = min([isl.get_population().champion_f[0] for isl in archi]) < stop_threshold
